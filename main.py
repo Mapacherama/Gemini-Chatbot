@@ -11,22 +11,30 @@ model = genai.GenerativeModel("gemini-pro")
 # Flask web app setup
 app = Flask(__name__)
 
+from flask import render_template
+
+@app.route("/")
+def home():
+    return render_template("index.html")
+
 chat_history = []
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    data = request.get_json()
-    user_input = data.get("message", "")
+    try:
+        data = request.get_json()
+        user_input = data.get("message", "").strip()
 
-    if not user_input:
-        return jsonify({"error": "No message provided"}), 400
+        if not user_input:
+            return jsonify({"error": "Empty message"}), 400
 
-    chat_history.append({"role": "user", "content": user_input})
+        # Correct API call format
+        response = model.generate_content([{"role": "user", "parts": [{"text": user_input}]}])
 
-    response = model.generate_content(chat_history)
-    chat_history.append({"role": "assistant", "content": response.text})
+        return jsonify({"response": response.text})
 
-    return jsonify({"response": response.text})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
