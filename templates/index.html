@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Chatbot</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .chatbox { width: 50%; margin: auto; padding: 20px; border: 1px solid #ddd; }
+        .chat { display: flex; flex-direction: column; }
+        .user, .bot { padding: 10px; margin: 5px; border-radius: 5px; }
+        .user { background-color: #4CAF50; color: white; text-align: right; }
+        .bot { background-color: #ddd; text-align: left; }
+    </style>
+</head>
+<body>
+    <h1>Gemini Chatbot</h1>
+    <div class="chatbox">
+        <div id="chat" class="chat"></div>
+        <input type="text" id="message" placeholder="Type a message..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            let message = document.getElementById("message").value;
+            let chatDiv = document.getElementById("chat");
+
+            if (!message.trim()) return;
+
+            chatDiv.innerHTML += `<div class='user'>${message}</div>`;
+            document.getElementById("message").value = "";
+
+            let response = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: message })
+            });
+
+            let data = await response.json();
+            chatDiv.innerHTML += `<div class='bot'>${data.response}</div>`;
+        }
+    </script>
+</body>
+</html>
